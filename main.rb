@@ -168,14 +168,14 @@ class GameWindow < Gosu::Window
     @move_piece_right = false  # used to trigger function that moves the piece right
     @moving_x_time = 0  # how long the piece should be moving in x direction
     @moving_y_time = 0  # how long the piece should be moving in y direction
-    @moving_piece = 0   # which piece number of the player is currently moving 
+    @moving_piece = nil   # which piece number of the player is currently moving 
     @moving_player = 0   # which player is currently moving
 
     @snl_trigger = false  # used to trigger function that will move the piece if tile has snake or ladder
     @snl_moving = false  #  this triggers the actual movement of the piece to the new tile
 
-    @board_leftX = 0  #  x coordinate of the the tile to which the piece will move towards 
-    @board_topY = 0  #  y coordinate of the the tile to which the piece will move towards
+    @tile_leftX = 0  #  x coordinate of the the tile to which the piece will move towards 
+    @tile_topY = 0  #  y coordinate of the the tile to which the piece will move towards
     @player_leftX = 0   # x coordinate of the current piece that is set to move
     @player_topY = 0  # y coordinate of the current piece that is set to move
 
@@ -207,52 +207,36 @@ class GameWindow < Gosu::Window
     board_array(@board)
    
   end 
+  
+#   draw functions 
 
-#   draw board 
+#   draw the board
   def draw_board 
     # @board_image.draw(0, 0, 0)
-    row_index = 0
-    while row_index < 10
+    @board.each do |row|
+        row.each do |tile|
+                number = tile.number
+                x_loc = tile.dimension.leftX
+                y_loc = tile.dimension.topY
+                color = tile.color
+                Gosu.draw_rect(x_loc,y_loc, 100, 100, color, ZOrder::BACKGROUND, mode=:default)      
 
-            column_index = 0
-            while column_index < 10
-                number = @board[row_index][column_index].number
-                x_loc = @board[row_index][column_index].dimension.leftX
-                y_loc = @board[row_index][column_index].dimension.topY
-                color = @board[row_index][column_index].color
-                Gosu.draw_rect(x_loc,y_loc, 100, 100, color, ZOrder::BACKGROUND, mode=:default)     
+                # draw the number on the tile with alternate color for better visibility, and some padding from the corners 
                 if color == Gosu::Color::BLACK
                     @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::WHITE)
                 else 
                     @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::BLACK)
                 end
-                column_index += 1
-            end
-
-        row_index += 1
+        end
     end
-
-    # @board do |row|
-    #     row do |tile|
-    #             number = tile.number
-    #             x_loc = tile.dimension.leftX
-    #             y_loc = tile.dimension.topY
-    #             color = tile.color
-    #             Gosu.draw_rect(x_loc,y_loc, 100, 100, color, ZOrder::BACKGROUND, mode=:default)     
-    #             if color == Gosu::Color::BLACK
-    #                 @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::WHITE)
-    #             else 
-    #                 @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::BLACK)
-    #             end
-    #     end
-    # end
   end
+
 #   choose number of players 
   def choose_players
-    w_dim = 1500 / 3
-    h_dim = 1000 / 3
-    Gosu.draw_rect(w_dim, h_dim, w_dim, h_dim, Gosu::Color::BLUE, ZOrder::MIDDLE, mode=:default)
-    @number_text.draw_text(" NUMBER OF PLAYERS", w_dim + 100, h_dim + 10, ZOrder::TOP, 1.5, 1.5, Gosu::Color::WHITE )
+    w_dim = 1500 / 3  # width of the window divided by 3
+    h_dim = 1000 / 3  # height of the window divided by 3
+    Gosu.draw_rect(w_dim, h_dim, w_dim, h_dim, Gosu::Color::BLUE, ZOrder::MIDDLE, mode=:default)  # draw a blue rectangle in the middle of the window
+    @number_text.draw_text(" NUMBER OF PLAYERS", w_dim + 100, h_dim + 10, ZOrder::TOP, 1.5, 1.5, Gosu::Color::WHITE ) 
     
     # player 1 
     Gosu.draw_rect(w_dim + 90, h_dim + 60, 130, 70, Gosu::Color::WHITE, ZOrder::MIDDLE, mode=:default)
@@ -269,29 +253,22 @@ class GameWindow < Gosu::Window
     
   end
 
-#   draw player sections 
   
+#   draw sections for each player with their pieces 
   def player_sections
     i = 0
-    x_loc = 0
+    y_loc = 0   # y coordinate of the player section, will be incremented for each player so it moves down 
     while i < @player_number
         if i % 2 == 1  # for alternate color sections
-           Gosu.draw_rect(1000, 0 + x_loc, 500, 200, Gosu::Color::WHITE, ZOrder::MIDDLE, mode=:default)  # player section  
-           @number_text.draw_text("Player #{i + 1}", 1050, 20 + x_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)  # player number
+           Gosu.draw_rect(1000, 0 + y_loc, 500, 200, Gosu::Color::WHITE, ZOrder::MIDDLE, mode=:default)  # player section  
+           @number_text.draw_text("Player #{i + 1}", 1050, 20 + y_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)  # player number
         else 
-            Gosu.draw_rect(1000, 0 + x_loc, 500, 200, Gosu::Color::GRAY, ZOrder::MIDDLE, mode=:default)
-            @number_text.draw_text("Player #{i + 1}", 1050, 20 + x_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)
-        end
-        # place pieces 
-        n = 0
-        while n < 1
-            @player_pieces[i][n].image.draw(@player_pieces[i][n].dimension.leftX, @player_pieces[i][n].dimension.topY, ZOrder::TOP ) 
-            n += 1
+            Gosu.draw_rect(1000, 0 + y_loc, 500, 200, Gosu::Color::GRAY, ZOrder::MIDDLE, mode=:default)
+            @number_text.draw_text("Player #{i + 1}", 1050, 20 + y_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)
         end
         i += 1
-        x_loc += 200
+        y_loc += 200
    end
-
   end 
 
 #   draw snakes 
@@ -306,20 +283,21 @@ class GameWindow < Gosu::Window
     @snake_2.draw(0, 600, ZOrder::MIDDLE, 1, 1)
 
     # ladder 1 
+    @ladder_1.draw(260, 0, ZOrder::MIDDLE, 0.18, 0.18)
+    @ladder_1.draw(630, 270, ZOrder::MIDDLE, 0.13, 0.13)
+    # ladder 2 (flipped)
     @ladder_2.draw(40, 390, ZOrder::MIDDLE, 0.13, 0.13)
     @ladder_2.draw(730, 570, ZOrder::MIDDLE, 0.13, 0.13)
     @ladder_2.draw(0, 30, ZOrder::MIDDLE, 0.08, 0.08)
-
-    @ladder_1.draw(260, 0, ZOrder::MIDDLE, 0.18, 0.18)
-    @ladder_1.draw(630, 270, ZOrder::MIDDLE, 0.13, 0.13)
   end
  
 
 #   draw dice 
   def draw_dice
-    Gosu.draw_rect(1000, 800, 500, 200, Gosu::Color::BLACK, ZOrder::TOP, mode=:default)
-    @number_text.draw_text("Player #{@player_turn}'s turn", 1050, 860, ZOrder::TOP, 2, 2, Gosu::Color::WHITE)
+    Gosu.draw_rect(1000, 800, 500, 200, Gosu::Color::BLACK, ZOrder::TOP, mode=:default)  # draw a black rectangle for the dice section 
+    @number_text.draw_text("Player #{@player_turn}'s turn", 1050, 860, ZOrder::TOP, 2, 2, Gosu::Color::WHITE) # show the player's turn
     
+    # draw the dice image based on the number currently rolled ------ currently using case statement to iterate through all dice numbers, but if variable can be inserted into another one (like #{} with string) then it can be simplified 
     case @dice_number
     when 0
         @dice.dice_0.draw(@dice.dimension_0.leftX, @dice.dimension_0.topY, ZOrder::TOP, 3, 3)
@@ -336,189 +314,216 @@ class GameWindow < Gosu::Window
     when 6
         @dice.dice_6.draw(@dice.dimension.leftX, @dice.dimension.topY, ZOrder::TOP, 3, 3)
     end
-    
+
   end
 
-#   draw music button 
-    def draw_music
-        Gosu.draw_rect(1380, 20, 100, 40, Gosu::Color::BLACK, ZOrder::TOP, mode=:default)
-        if @song.playing? 
-            Gosu.draw_rect(1480, 20, 40, 40, Gosu::Color::GREEN, ZOrder::TOP, mode=:default)
-            @number_text.draw_text("Music: ON", 1385, 30, ZOrder::TOP, 1, 1, Gosu::Color::WHITE)
-        else 
-            Gosu.draw_rect(1480, 20, 40, 40, Gosu::Color::RED, ZOrder::TOP, mode=:default)
-            @number_text.draw_text("Music: OFF", 1385, 30, ZOrder::TOP, 1, 1, Gosu::Color::WHITE) 
-        end
-    end
+   # draw music button 
+  def draw_music 
+       Gosu.draw_rect(1380, 20, 100, 40, Gosu::Color::BLACK, ZOrder::TOP, mode=:default) # draw a black rectangle for the music button
+       if @song.playing?  # if the song is playing, show ON with green bar
+           Gosu.draw_rect(1480, 20, 40, 40, Gosu::Color::GREEN, ZOrder::TOP, mode=:default)
+           @number_text.draw_text("Music: ON", 1385, 30, ZOrder::TOP, 1, 1, Gosu::Color::WHITE)
+       else  # if the song is not playing, show OFF with red bar
+           Gosu.draw_rect(1480, 20, 40, 40, Gosu::Color::RED, ZOrder::TOP, mode=:default)
+           @number_text.draw_text("Music: OFF", 1385, 30, ZOrder::TOP, 1, 1, Gosu::Color::WHITE) 
+       end
+  end   
 
-    # draw new position of player piece after snl 
-    def draw_snl_position(i)
-        
-    end
+   # draw the pieces based on dimensions assigned 
+  def draw_player_pieces
+       @player_pieces.each do |player|
+           player.each do |piece|
+               piece.image.draw(piece.dimension.leftX, piece.dimension.topY, ZOrder::TOP)
+           end
+       end
+  end
 
-  def update
-    if @roll_dice 
-       if Gosu.milliseconds - @time < 1000
-            @dice_number = rand(1..6)
-       else
-            @roll_dice = false
-            i = 0
-            while i < @player_pieces[@player_turn - 1].length
-                if @player_pieces[@player_turn - 1][i].inOrigin == true && @dice_number != 6
+#   update functions 
+
+  #on dice click
+  def dice_roll
+    if @roll_dice   # checks if dice roll has been triggered
+        #rolls the dice for 1 second and assigns a random number to the dice 
+        if Gosu.milliseconds - @time < 1000
+             @dice_number = rand(1..6)
+        else
+            # after 1 second has passed 
+            @roll_dice = false  # stops the dice roll
+
+        # insert code here to check if the player has won/about to win
+            @player_pieces[@player_turn -1].each do |piece|  # iterates through the pieces of the current player 
+                # if the piece is in the origin and the dice number is not 6, then the turn is skipped. else the player can move their piece 
+                if piece.inOrigin == true && @dice_number != 6  
                     @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1
                     @dice_number = 0
                     @fail.play
-                else
+                else  
                     @player_moving = true 
                     @success.play
                 end
-                i += 1
-            
-         end
+            end
+        end
+      end
+  end
+
+  #   play song on loop 
+  def loop_song 
+    if !@song.playing? && !@song.paused? # if the song is not playing and not paused either, play the song again
+        @song.play
     end
   end
 
+#   move pieces 
+  def move_pieces
 
-    if !@song.playing? && !@song.paused?
-        @song.play
-    end
-
+    # move piece towards the right side of the board
     if @move_piece_right
-        
-        if Gosu.milliseconds - @time <  @moving_x_time
-          @player_pieces[@moving_player][@moving_piece].dimension.leftX += 5
-          @player_moving = true
+        if Gosu.milliseconds - @time <  @moving_x_time  # keep moving piece for the set time 
+          @moving_piece.dimension.leftX += 5  # add to the x coordinate of the piece so it moves to the right
+          @player_moving = true  # keeps the player moving until the piece has reached the destination, this prevents dice from being rolled
         else 
-            @player_pieces[@moving_player][@moving_piece].dimension.leftX = @board_leftX
-            @move_piece_right = false
-            @player_moving = false
-            if @moving_x_time > @moving_y_time
-                @snl_moving = @snl_trigger
-                @snl_trigger = false
-                @moving_x_time = 0
-                @moving_y_time = 0
+            # once piece has moved for the set time
+            @moving_piece.dimension.leftX = @tile_leftX   # set the piece's dimension to the destination tile to confirm its on the desired spot
+            @move_piece_right = false  #remove the move piece right trigger
+            @player_moving = false  # ensure player is not moving anymore so dice can be rolled 
 
+            # check which direction the piece will move for a longer time
+            # if x is moving for longer, then trigger snl movement - this prevents snl movement from being triggered too early (before the piece has reached the initial tile), else  the piece would move directly to the snl tile
+            if @moving_x_time > @moving_y_time  
+                @snl_moving = @snl_trigger  # trigger snl movement if tile is a snl tile
+                @snl_trigger = false  # reset the snl trigger
             end
+            @moving_x_time = 0  # reset the moving x time so it can be reused for the next piece movement
         end
     end
+
+    # move piece towards the left side of the board
     if @move_piece_left
-       
+        #same logic as above
         if Gosu.milliseconds - @time < @moving_x_time
-            @player_pieces[@moving_player][@moving_piece].dimension.leftX -= 5
+            @moving_piece.dimension.leftX -= 5
             @player_moving = true
         else
-            @player_pieces[@moving_player][@moving_piece].dimension.leftX = @board_leftX
+            @moving_piece.dimension.leftX = @tile_leftX
             @move_piece_left = false
             @player_moving = false
             if @moving_x_time > @moving_y_time
                 @snl_moving = @snl_trigger
                 @snl_trigger = false
-                @moving_x_time = 0
-                @moving_y_time = 0
-
             end
+            @moving_x_time = 0
         end
     end
 
+    # move piece towards the top of the board
     if @move_piece_up
+        #same logic as above
         if Gosu.milliseconds - @time < @moving_y_time
-            @player_pieces[@moving_player][@moving_piece].dimension.topY -= 5
+            @moving_piece.dimension.topY -= 5
             @player_moving = false
         else
-            @player_pieces[@moving_player][@moving_piece].dimension.topY = @board_topY
+            @moving_piece.dimension.topY = @tile_topY
             @move_piece_up = false
             @player_moving = false
             if @moving_x_time < @moving_y_time
                 @snl_moving = @snl_trigger
                 @snl_trigger = false
-                @moving_x_time = 0
-                @moving_y_time = 0
-
             end
+            @moving_y_time = 0
         end
 
     end
 
+    # move piece towards the bottom of the board
     if @move_piece_down
-        
+        # same logic as above 
         if Gosu.milliseconds - @time < @moving_y_time
-            @player_pieces[@moving_player][@moving_piece].dimension.topY += 5
+            @moving_piece.dimension.topY += 5
             @player_moving = true
         else
-            @player_pieces[@moving_player][@moving_piece].dimension.topY = @board_topY
+            @moving_piece.dimension.topY = @tile_topY
             @move_piece_down = false
             @player_moving = false
             if @moving_x_time < @moving_y_time
                 @snl_moving = @snl_trigger
                 @snl_trigger = false
-                @moving_x_time = 0
-                @moving_y_time = 0
             end
+            @moving_y_time = 0
         end
 
     end
-    
-    if @snl_moving
-      
-        number = @player_pieces[@moving_player][@moving_piece].number    
-        
-        row_index = 0
-        while row_index < 10
-        col_index = 0
-        while col_index < 10
-         if @board[row_index][col_index].number  == number
+  end
 
-            @board_leftX = @board[row_index][col_index].dimension.leftX + 25
-            @board_topY = @board[row_index][col_index].dimension.topY + 25
-            @player_leftX = @player_pieces[@moving_player][@moving_piece].dimension.leftX
-            @player_topY = @player_pieces[@moving_player][@moving_piece].dimension.topY
+  def set_piece_destination(tile, piece)
+     # set variables for the destination tile and piece dimensions 
+     @tile_leftX = tile.dimension.leftX + 25  
+     @tile_topY = tile.dimension.topY + 25
+     @player_leftX = piece.dimension.leftX
+     @player_topY = piece.dimension.topY
 
-            if @player_leftX < @board_leftX
-                @time = Gosu.milliseconds
-                difference = @board_leftX - @player_leftX
-                @moving_x_time = difference.to_f / 265 * 1000
-                @move_piece_right = true 
-                
-            elsif @player_leftX > @board_leftX
-                @time = Gosu.milliseconds
-                difference = @player_leftX - @board_leftX
-                @moving_x_time = difference.to_f / 265 * 1000
-                @move_piece_left = true
+     # check if piece dimension is greater or less than destination tile to determine which direction the piece will move
+     if @player_leftX < @tile_leftX
+         @time = Gosu.milliseconds
+         difference = @tile_leftX - @player_leftX  
+         @moving_x_time = difference.to_f / 265 * 1000  # set the moving time to the time it will take for the piece to reach the destination tile on the x axis
+         @move_piece_right = true  # trigger piece movement 
+         
+     elsif @player_leftX > @tile_leftX
+         # same logic as above
+         @time = Gosu.milliseconds
+         difference = @player_leftX - @tile_leftX
+         @moving_x_time = difference.to_f / 265 * 1000
+         @move_piece_left = true
+   end
+
+     # same logic as above for the y axis
+     if @player_topY < @tile_topY
+         @time = Gosu.milliseconds
+         difference = @tile_topY - @player_topY
+         @moving_y_time = difference.to_f / 265 * 1000
+         @move_piece_down = true
+
+     elsif @player_topY > @tile_topY
+         @time = Gosu.milliseconds
+         difference = @player_topY - @tile_topY
+         @moving_y_time = difference.to_f / 265 * 1000
+         @move_piece_up = true
+     end
+
+     # set the rest of the piece dimensions, this is done here since they are for detecting click events and do not have effect on the movement of the piece 
+     piece.dimension.rightX = tile.dimension.rightX + 25  
+     piece.dimension.bottomY = tile.dimension.bottomY + 25
+  end
+
+#   move pieces on snake and ladder tiles
+  def move_snl 
+    if @snl_moving  # if snl movement has been triggered
+        number = @moving_piece.number  # get the number of the piece that is moving
+        # iterate through each tile to find the tile that the piece is set to move towards
+        @board.each do |row|  
+            row.each do |tile|
+                if tile.number == number  
+                    set_piece_destination(tile, @moving_piece )  # set the piece's destination to the tile's destination
+                end
             end
-
-            if @player_topY < @board_topY
-                @time = Gosu.milliseconds
-                difference = @board_topY - @player_topY
-                @moving_y_time = difference.to_f / 265 * 1000
-                @move_piece_down = true
-
-            elsif @player_topY > @board_topY
-                @time = Gosu.milliseconds
-                difference = @player_topY - @board_topY
-                @moving_y_time = difference.to_f / 265 * 1000
-                @move_piece_up = true
-            end
-
-            @player_pieces[@moving_player][@moving_piece].dimension.rightX = @board[row_index][col_index].dimension.rightX+ 25
-            @player_pieces[@moving_player][@moving_piece].dimension.bottomY = @board[row_index][col_index].dimension.bottomY + 25
-         end
-     
-             col_index += 1
-         end
-         row_index += 1
         end
+
+        #once the moving times are reset, remove the snl movement trigger. this is done to ensure the piece has reached the destination tile before the trigger is removed
         if @moving_x_time == 0 && @moving_y_time == 0
-            @snl_moving = false
-            puts "snl moving false"
+            @snl_moving = false  
         end
-    
     end
+  end
 
+  def update
+    dice_roll()
+    loop_song()
+    move_pieces()
+    move_snl()
   end
 
 
   def draw
-    
     if @start 
         if @player_number != 0
             draw_board() 
@@ -526,11 +531,13 @@ class GameWindow < Gosu::Window
             draw_dice()
             draw_snakes_ladders()
             draw_music()
+            draw_player_pieces()
         else 
             choose_players() 
 
         end
-    elsif !@start
+    else
+        # draw the start screen
         @number_text.draw_text("CLICK ANYWHERE TO START", 350, 450, ZOrder::BACKGROUND, 3.0, 3.0, Gosu::Color::WHITE)
     end
   end
@@ -545,6 +552,91 @@ class GameWindow < Gosu::Window
 
   def needs_cursor?; true; end
 
+#   mouse click functions 
+
+  # check whcih button is clicked on the choose player screen
+  def choose_player_number
+    if @player_number == 0 && @start
+        if area_clicked(590, 400, 720, 460)
+            @player_number = 1
+        elsif area_clicked(780, 400, 910, 460)
+            @player_number = 2
+        elsif area_clicked(590, 540, 720, 600)
+            @player_number = 3
+        elsif area_clicked(780, 540, 910, 600)
+            @player_number = 4
+        end
+    end
+  end
+
+  # check if the dice is clicked
+  def dice_click 
+    if area_clicked(@dice.dimension.leftX,@dice.dimension.topY, @dice.dimension.rightX,@dice.dimension.bottomY) && @player_number != 0
+        # roll dice only if its no ones turn 
+        if !@player_moving
+            
+            @time = Gosu.milliseconds
+            @roll_dice = true
+            @rolling.play
+
+        end
+    end
+  end
+
+#   start moving the piece towards the destination tile
+  def piece_click_move(piece)
+
+    @board.each do |row|
+        row.each do |tile|
+            if tile.number == piece.number
+                set_piece_destination(tile, piece)
+
+                # check if the piece is on a snake or ladder tile
+                if tile.snl == true
+                    piece.number = tile.snl_goto  # set the piece's number to where the snake or ladder leads to 
+                    #reset time for piece movement and set trigger to indicate piece should move on snake or ladder tile
+                    @time = Gosu.milliseconds
+                    @snl_trigger = true
+                end
+
+                piece.inOrigin = false # set the piece's inOrigin to false to indicate it is no longer in its origin tile
+                @moving.play # play the moving sound
+
+                # if the player rolls a 6 they get another turn, otherwise it is the next player's turn
+                if @dice_number != 6
+                    @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1   
+                end
+
+                @player_moving = false # set player moving to false to indicate the player has finished moving
+                @dice_number = 0  # reset the dice number to 0
+            end
+        end
+    end
+  end
+
+  def piece_click
+      if @player_pieces.length != 0 
+        # iterate through each player piece to check if it is clicked
+        @player_pieces.each do |player|
+            player.each do |piece|
+                if area_clicked(piece.dimension.leftX, piece.dimension.topY, piece.dimension.rightX, piece.dimension.bottomY)
+                    # if the piece is clicked, check if the piece is either in its original location, or if the player rolled a 6. -- this is done because piece can only be moved out of its original location if the player rolls a 6
+                    if piece.inOrigin == false || @dice_number == 6 
+                        @moving_piece = piece   
+                        piece.number += @dice_number  # set the piece's number to the number of the tile it is moving towards
+                        piece_click_move(piece) 
+                    else 
+                        # next player's turn  
+                        @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1
+                        @player_moving = false
+                    end
+                end
+            end
+        end
+
+      end
+  end
+
   def button_down(id)
       case id
       when Gosu::MsLeft
@@ -552,128 +644,20 @@ class GameWindow < Gosu::Window
         if area_clicked(0, 0, 1500, 1000)
             @start = true
         end
-        # check number of players chosen 
-        if @player_number == 0 && @start
-            if area_clicked(590, 400, 720, 460)
-                @player_number = 1
-            elsif area_clicked(780, 400, 910, 460)
-                @player_number = 2
-            elsif area_clicked(590, 540, 720, 600)
-                @player_number = 3
-            elsif area_clicked(780, 540, 910, 600)
-                @player_number = 4
-            end
-        end
 
-        # check if dice is clicked 
-        if area_clicked(@dice.dimension.leftX,@dice.dimension.topY, @dice.dimension.rightX,@dice.dimension.bottomY) && @player_number != 0
-            
-            # roll dice only if its no ones turn 
-            if !@player_moving
-                
-                @time = Gosu.milliseconds
-                @roll_dice = true
-                @rolling.play
+        choose_player_number()
+        dice_click()
+        piece_click()
 
-            end
-            
-        end
-
-        # move pieces 
-       
-        if @player_pieces.length != 0 
-            i = 0
-            while i < @player_pieces[@player_turn - 1].length
-              if area_clicked(@player_pieces[@player_turn - 1][i].dimension.leftX, @player_pieces[@player_turn - 1][i].dimension.topY, @player_pieces[@player_turn - 1][i].dimension.rightX, @player_pieces[@player_turn - 1][i].dimension.bottomY) && @player_moving
-                if @player_pieces[@player_turn - 1][i].inOrigin == false || @dice_number == 6 
-                    @moving_piece = i
-                    @moving_player = @player_turn - 1
-                    @player_pieces[@player_turn - 1][i].number += @dice_number
-                    number = @player_pieces[@player_turn - 1][i].number
-                    row_index = 0
-                    while row_index < 10
-                      col_index = 0
-                      while col_index < 10
-                       if @board[row_index][col_index].number  == number
-       
-       
-                           @board_leftX = @board[row_index][col_index].dimension.leftX + 25
-                           @board_topY = @board[row_index][col_index].dimension.topY + 25
-                           @player_leftX = @player_pieces[@player_turn - 1][i].dimension.leftX 
-                           @player_topY = @player_pieces[@player_turn - 1][i].dimension.topY
-                           if @player_leftX < @board_leftX
-                               @time = Gosu.milliseconds
-                               difference = @board_leftX - @player_leftX
-                               @moving_x_time = difference.to_f / 265 * 1000
-                               @move_piece_right = true 
-                               
-       
-                           elsif @player_leftX > @board_leftX
-                               @time = Gosu.milliseconds
-                               difference = @player_leftX - @board_leftX
-                               @moving_x_time = difference.to_f / 265 * 1000
-                               @move_piece_left = true
-                           end
-       
-                           if @player_topY < @board_topY
-                               @time = Gosu.milliseconds
-                               difference = @board_topY - @player_topY
-                               @moving_y_time = difference.to_f / 265 * 1000
-                               @move_piece_down = true
-       
-                           elsif @player_topY > @board_topY
-                               @time = Gosu.milliseconds
-                               difference = @player_topY - @board_topY
-                               @moving_y_time = difference.to_f / 265 * 1000
-                               @move_piece_up = true
-                           end
-  
-                           @player_pieces[@player_turn - 1][i].dimension.rightX = @board[row_index][col_index].dimension.rightX+ 25
-                           @player_pieces[@player_turn - 1][i].dimension.bottomY = @board[row_index][col_index].dimension.bottomY + 25
-                       
-       
-                           if @board[row_index][col_index].snl == true 
-                               
-                               @player_pieces[@player_turn - 1][i].number = @board[row_index][col_index].snl_goto 
-                               @time = Gosu.milliseconds
-                               @snl_trigger = true
-                               puts "snl #{@snl_trigger}" 
-                               puts @player_pieces[@player_turn - 1][i].number
-                           end
-       
-                           @player_pieces[@player_turn - 1][i].inOrigin = false
-                           @moving.play
-                           
-            
-                           if @dice_number != 6
-                               @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1   
-                           end
-                           @player_moving = false
-                           @dice_number = 0
-           
-                           end
-                   
-                           col_index += 1
-                       end
-                       row_index += 1
-                    end
-                    
-                else 
-                    @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1
-                    @player_moving = false
-                end
-              end
-              i += 1
-           end
-        end
-
-        # check if music is clicked
+        # check if music button is clicked
         if area_clicked(1380, 20, 1500, 60)
             @song.playing? ? @song.pause : @song.play
         end
 
       end
   end
+  
+
 end
 
 GameWindow.new.show if __FILE__ == $0
