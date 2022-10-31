@@ -85,8 +85,8 @@ end
 
 # make the array for the board 
 def board_array(board)
-    snl_array =      [94, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
-    snl_goto_array = [ 88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
+    snl_array =      [6,4, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
+    snl_goto_array = [56, 88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
 
     row_index = 0
     tile_number = 1 # track tile number
@@ -403,6 +403,7 @@ class GameWindow < Gosu::Window
         if Gosu.milliseconds - @time < @moving_x_time
             @moving_piece.dimension.leftX -= 5
             @player_moving = true
+            puts @moving_piece.number
         else
             @moving_piece.dimension.leftX = @tile_leftX
             @move_piece_left = false
@@ -498,11 +499,11 @@ class GameWindow < Gosu::Window
 #   move pieces on snake and ladder tiles
   def move_snl 
     if @snl_moving  # if snl movement has been triggered
-        number = @moving_piece.number  # get the number of the piece that is moving
+        @moving_piece.number = @moving_piece.goto_number # set the piece number to the snake or ladder number
         # iterate through each tile to find the tile that the piece is set to move towards
         @board.each do |row|  
             row.each do |tile|
-                if tile.number == number  
+                if tile.number == @moving_piece.number  
                     set_piece_destination(tile, @moving_piece )  # set the piece's destination to the tile's destination
                 end
             end
@@ -593,9 +594,9 @@ class GameWindow < Gosu::Window
 
                 # check if the piece is on a snake or ladder tile
                 if tile.snl == true
-                    piece.number = tile.snl_goto  # set the piece's number to where the snake or ladder leads to 
+                    piece.goto_number = tile.snl_goto  # set the piece's goto number to where the snake or ladder leads to, this is done so the main number only changes when the actual snl movement is triggered 
                     #reset time for piece movement and set trigger to indicate piece should move on snake or ladder tile
-                    @time = Gosu.milliseconds
+
                     @snl_trigger = true
                 end
 
