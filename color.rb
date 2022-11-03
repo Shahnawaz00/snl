@@ -1,237 +1,248 @@
 require 'gosu'
 
 def choose_color(x, y)
-    color = Gosu::Color::WHITE
+    grey = Gosu::Color.argb(0xff_404042)
+    red = Gosu::Color.argb(0xff_E31E25)
+    orange = Gosu::Color.argb(0xff_EF7F1B)
+    yellow = Gosu::Color.argb(0xff_FFEB00)
+    lgreen = Gosu::Color.argb(0xff_6AA33A)
+    dgreen = Gosu::Color.argb(0xff_5C8737)
+    purple = Gosu::Color.argb(0xff_562581)
+    pink = Gosu::Color.argb(0xff_C10075)
+    lblue = Gosu::Color.argb(0xff_019BD7)
+    dblue = Gosu::Color.argb(0xff_232D82)
+    color = Gosu::Color::WHITE   # default color
+
     case x
     when 0 
       case y
        when 0
-        color = Gosu::Color::RED
+        color = red
        when 1
-        color = Gosu::Color::BLACK
+        color = grey
        when 2 
-        color =  Gosu::Color::YELLOW
+        color = orange
        when 3 
-        color = Gosu::Color::BLACK
+        color = grey
        when 4
-        color = Gosu::Color::FUCHSIA
+        color = yellow
        when 5
-        color = Gosu::Color::BLACK
+        color = grey
        when 6
-        color = Gosu::Color::GREEN
+        color = lgreen
        when 7 
-        color =  Gosu::Color::BLACK
+        color =  grey
        when 8 
-        color = Gosu::Color::CYAN
+        color = dgreen
        when 9 
-        color = Gosu::Color::BLACK
+        color = grey 
       end
     when 1   
         case y
         when 0
-         color = Gosu::Color::BLACK
+         color = dgreen
         when 1
-         color = Gosu::Color::RED
+         color = grey
         when 2 
-         color =  Gosu::Color::BLACK
+         color = lgreen
         when 3 
-         color = Gosu::Color::YELLOW
+         color = grey
         when 4
-         color = Gosu::Color::BLACK
+         color = yellow
         when 5
-         color = Gosu::Color::FUCHSIA
+         color = grey
         when 6
-         color = Gosu::Color::BLACK
+         color = orange
         when 7 
-         color =  Gosu::Color::GREEN
+         color = grey
         when 8 
-         color = Gosu::Color::BLACK
+         color = red
         when 9 
-         color = Gosu::Color::CYAN
+         color = grey
        end
     when 2
       case y
        when 0
-        color = Gosu::Color::RED
+        color = purple
        when 1
-        color = Gosu::Color::BLACK
+        color = grey
        when 2 
-        color =  Gosu::Color::YELLOW
+        color = red
        when 3 
-        color = Gosu::Color::BLACK
+        color = grey
        when 4
-        color = Gosu::Color::FUCHSIA
+        color = orange
        when 5
-        color = Gosu::Color::BLACK
+        color = grey 
        when 6
-        color = Gosu::Color::GREEN
+        color = yellow 
        when 7 
-        color =  Gosu::Color::BLACK
+        color = grey 
        when 8 
-        color = Gosu::Color::CYAN
+        color = lgreen 
        when 9 
-        color = Gosu::Color::BLACK
+        color = grey
       end
     when 3  
         case y
         when 0
-         color = Gosu::Color::BLACK
+         color = lgreen
         when 1
-         color = Gosu::Color::RED
+         color = grey 
         when 2 
-         color =  Gosu::Color::BLACK
+         color = yellow 
         when 3 
-         color = Gosu::Color::YELLOW
+         color = grey
         when 4
-         color = Gosu::Color::BLACK
+         color = orange
         when 5
-         color = Gosu::Color::FUCHSIA
+         color = grey
         when 6
-         color = Gosu::Color::BLACK
+         color = red 
         when 7 
-         color =  Gosu::Color::GREEN
+         color = grey 
         when 8 
-         color = Gosu::Color::BLACK
+         color = purple 
         when 9 
-         color = Gosu::Color::CYAN
+         color = grey
        end
     when 4 
       case y
        when 0
-        color = Gosu::Color::RED
+        color = pink
        when 1
-        color = Gosu::Color::BLACK
+        color = grey 
        when 2 
-        color =  Gosu::Color::YELLOW
+        color = purple
        when 3 
-        color = Gosu::Color::BLACK
+        color = grey 
        when 4
-        color = Gosu::Color::FUCHSIA
+        color = red 
        when 5
-        color = Gosu::Color::BLACK
+        color = grey 
        when 6
-        color = Gosu::Color::GREEN
+        color =  orange
        when 7 
-        color =  Gosu::Color::BLACK
+        color = grey 
        when 8 
-        color = Gosu::Color::CYAN
+        color = yellow 
        when 9 
-        color = Gosu::Color::BLACK
+        color = grey
       end
     when 5   
         case y
         when 0
-         color = Gosu::Color::BLACK
+         color = yellow
         when 1
-         color = Gosu::Color::RED
+         color = grey 
         when 2 
-         color =  Gosu::Color::BLACK
+         color = orange 
         when 3 
-         color = Gosu::Color::YELLOW
+         color = grey 
         when 4
-         color = Gosu::Color::BLACK
+         color = red 
         when 5
-         color = Gosu::Color::FUCHSIA
+         color = grey
         when 6
-         color = Gosu::Color::BLACK
+         color = purple
         when 7 
-         color =  Gosu::Color::GREEN
+         color = grey 
         when 8 
-         color = Gosu::Color::BLACK
+         color = pink
         when 9 
-         color = Gosu::Color::CYAN
+         color = grey
        end
     when 6 
       case y
        when 0
-        color = Gosu::Color::RED
+        color = lblue
        when 1
-        color = Gosu::Color::BLACK
+        color = grey 
        when 2 
-        color =  Gosu::Color::YELLOW
+        color = pink 
        when 3 
-        color = Gosu::Color::BLACK
+        color = grey 
        when 4
-        color = Gosu::Color::FUCHSIA
+        color = purple
        when 5
-        color = Gosu::Color::BLACK
+        color = grey 
        when 6
-        color = Gosu::Color::GREEN
+        color = red 
        when 7 
-        color =  Gosu::Color::BLACK
+        color = grey 
        when 8 
-        color = Gosu::Color::CYAN
+        color = orange 
        when 9 
-        color = Gosu::Color::BLACK
+        color = grey
       end
     when 7   
         case y
         when 0
-         color = Gosu::Color::BLACK
+         color = orange
         when 1
-         color = Gosu::Color::RED
+         color = grey 
         when 2 
-         color =  Gosu::Color::BLACK
+         color = red  
         when 3 
-         color = Gosu::Color::YELLOW
+         color =  grey 
         when 4
-         color = Gosu::Color::BLACK
+         color = purple 
         when 5
-         color = Gosu::Color::FUCHSIA
+         color =  grey 
         when 6
-         color = Gosu::Color::BLACK
+         color = pink 
         when 7 
-         color =  Gosu::Color::GREEN
+         color =  grey 
         when 8 
-         color = Gosu::Color::BLACK
+         color = lblue 
         when 9 
-         color = Gosu::Color::CYAN
+         color = grey
        end
     when 8 
         case y
         when 0
-         color = Gosu::Color::RED
+         color = dblue
         when 1
-         color = Gosu::Color::BLACK
+         color = grey 
         when 2 
-         color =  Gosu::Color::YELLOW
+         color = lblue
         when 3 
-         color = Gosu::Color::BLACK
+         color = grey
         when 4
-         color = Gosu::Color::FUCHSIA
+         color = pink 
         when 5
-         color = Gosu::Color::BLACK
+         color = grey
         when 6
-         color = Gosu::Color::GREEN
+         color = purple
         when 7 
-         color =  Gosu::Color::BLACK
+         color = grey 
         when 8 
-         color = Gosu::Color::CYAN
+         color =  red 
         when 9 
-         color = Gosu::Color::BLACK
+         color = grey
        end
     when 9   
         case y
         when 0
-         color = Gosu::Color::BLACK
+         color = red 
         when 1
-         color = Gosu::Color::RED
+         color = grey
         when 2 
-         color =  Gosu::Color::BLACK
+         color = purple 
         when 3 
-         color = Gosu::Color::YELLOW
+         color = grey 
         when 4
-         color = Gosu::Color::BLACK
+         color = pink 
         when 5
-         color = Gosu::Color::FUCHSIA
+         color = grey 
         when 6
-         color = Gosu::Color::BLACK
+         color = lblue
         when 7 
-         color =  Gosu::Color::GREEN
+         color = grey 
         when 8 
-         color = Gosu::Color::BLACK
+         color = dblue 
         when 9 
-         color = Gosu::Color::CYAN
+         color = grey
        end
     end
     return color

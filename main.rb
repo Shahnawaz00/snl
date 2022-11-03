@@ -85,8 +85,8 @@ end
 
 # make the array for the board 
 def board_array(board)
-    snl_array =      [6,4, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
-    snl_goto_array = [56, 88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
+    snl_array =      [94, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
+    snl_goto_array = [88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
 
     row_index = 0
     tile_number = 1 # track tile number
@@ -198,6 +198,9 @@ class GameWindow < Gosu::Window
     @ladder_2 = Gosu::Image.new("images/ladder2.png")
     @ladder_3 = Gosu::Image.new("images/ladder3.png")
     @ladder_4 = Gosu::Image.new("images/ladder4.png")
+
+    # board wood
+    @wood = Gosu::Image.new("images/backwood.png")
     
     # make player pieces
     make_player_pieces(@player_pieces)
@@ -212,6 +215,7 @@ class GameWindow < Gosu::Window
 
 #   draw the board
   def draw_board 
+    @wood.draw(1000, 0, ZOrder::MIDDLE)  # side wood background
     # @board_image.draw(0, 0, 0)
     @board.each do |row|
         row.each do |tile|
@@ -221,11 +225,11 @@ class GameWindow < Gosu::Window
                 color = tile.color
                 Gosu.draw_rect(x_loc,y_loc, 100, 100, color, ZOrder::BACKGROUND, mode=:default)      
 
-                # draw the number on the tile with alternate color for better visibility, and some padding from the corners 
-                if color == Gosu::Color::BLACK
-                    @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::WHITE)
-                else 
+                # draw the number on the tile with black color on yellow for better visibility, and some padding from the corners 
+                if color == Gosu::Color.argb(0xff_FFEB00)
                     @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::BLACK)
+                else 
+                    @number_text.draw_text(number, x_loc + 10, y_loc + 10, ZOrder::BACKGROUND, 1.0, 1.0, Gosu::Color::WHITE)
                 end
         end
     end
@@ -235,7 +239,7 @@ class GameWindow < Gosu::Window
   def choose_players
     w_dim = 1500 / 3  # width of the window divided by 3
     h_dim = 1000 / 3  # height of the window divided by 3
-    Gosu.draw_rect(w_dim, h_dim, w_dim, h_dim, Gosu::Color::BLUE, ZOrder::MIDDLE, mode=:default)  # draw a blue rectangle in the middle of the window
+    Gosu.draw_rect(w_dim, h_dim, w_dim, h_dim, Gosu::Color.argb(0xff_232D82), ZOrder::MIDDLE, mode=:default)  # draw a blue rectangle in the middle of the window
     @number_text.draw_text(" NUMBER OF PLAYERS", w_dim + 100, h_dim + 10, ZOrder::TOP, 1.5, 1.5, Gosu::Color::WHITE ) 
     
     # player 1 
@@ -260,10 +264,8 @@ class GameWindow < Gosu::Window
     y_loc = 0   # y coordinate of the player section, will be incremented for each player so it moves down 
     while i < @player_number
         if i % 2 == 1  # for alternate color sections
-           Gosu.draw_rect(1000, 0 + y_loc, 500, 200, Gosu::Color::WHITE, ZOrder::MIDDLE, mode=:default)  # player section  
            @number_text.draw_text("Player #{i + 1}", 1050, 20 + y_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)  # player number
         else 
-            Gosu.draw_rect(1000, 0 + y_loc, 500, 200, Gosu::Color::GRAY, ZOrder::MIDDLE, mode=:default)
             @number_text.draw_text("Player #{i + 1}", 1050, 20 + y_loc, ZOrder::TOP, 1.5, 1.5, Gosu::Color::BLACK)
         end
         i += 1
@@ -294,8 +296,7 @@ class GameWindow < Gosu::Window
 
 #   draw dice 
   def draw_dice
-    Gosu.draw_rect(1000, 800, 500, 200, Gosu::Color::BLACK, ZOrder::TOP, mode=:default)  # draw a black rectangle for the dice section 
-    @number_text.draw_text("Player #{@player_turn}'s turn", 1050, 860, ZOrder::TOP, 2, 2, Gosu::Color::WHITE) # show the player's turn
+    @number_text.draw_text("Player #{@player_turn}'s turn", 1050, 860, ZOrder::TOP, 2, 2, Gosu::Color::BLACK) # show the player's turn
     
     # draw the dice image based on the number currently rolled ------ currently using case statement to iterate through all dice numbers, but if variable can be inserted into another one (like #{} with string) then it can be simplified 
     case @dice_number
@@ -332,9 +333,11 @@ class GameWindow < Gosu::Window
    # draw the pieces based on dimensions assigned 
   def draw_player_pieces
        @player_pieces.each do |player|
-           player.each do |piece|
-               piece.image.draw(piece.dimension.leftX, piece.dimension.topY, ZOrder::TOP)
-           end
+           if @player_pieces.index(player) < @player_number  # only draw the pieces for the number of players
+              player.each do |piece|
+                  piece.image.draw(piece.dimension.leftX, piece.dimension.topY, ZOrder::TOP)
+              end
+            end
        end
   end
 
@@ -499,6 +502,7 @@ class GameWindow < Gosu::Window
 #   move pieces on snake and ladder tiles
   def move_snl 
     if @snl_moving  # if snl movement has been triggered
+        # put sound here 
         @moving_piece.number = @moving_piece.goto_number # set the piece number to the snake or ladder number
         # iterate through each tile to find the tile that the piece is set to move towards
         @board.each do |row|  
@@ -549,7 +553,7 @@ class GameWindow < Gosu::Window
     else
         return false
     end
-   end 
+  end 
 
   def needs_cursor?; true; end
 
