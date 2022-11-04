@@ -85,8 +85,8 @@ end
 
 # make the array for the board 
 def board_array(board)
-    snl_array =      [94, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
-    snl_goto_array = [88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
+    snl_array =      [6,94, 84, 68, 47, 32, 22, 10, 23, 33, 45, 79]  # tile numbers where snake or ladder is present
+    snl_goto_array = [9, 88, 62, 50, 3, 14, 4, 29, 42, 52, 75, 81]  # tile numbers where snake or ladder goes to
 
     row_index = 0
     tile_number = 1 # track tile number
@@ -157,6 +157,8 @@ class GameWindow < Gosu::Window
     @player_number = 0
     # track current player 
     @player_turn = 1
+
+    @winners = [] # array to hold the winners
 
     # player pieces 
     @player_pieces = []    #number of pieces per player
@@ -394,6 +396,10 @@ class GameWindow < Gosu::Window
             # if x is moving for longer, then trigger snl movement - this prevents snl movement from being triggered too early (before the piece has reached the initial tile), else  the piece would move directly to the snl tile
             if @moving_x_time > @moving_y_time  
                 @snl_moving = @snl_trigger  # trigger snl movement if tile is a snl tile
+                # play sample depending on where the piece will move 
+                if @snl_trigger 
+                    @moving_piece.number < @moving_piece.goto_number ? @success.play : @fail.play
+                end
                 @snl_trigger = false  # reset the snl trigger
             end
             @moving_x_time = 0  # reset the moving x time so it can be reused for the next piece movement
@@ -406,13 +412,15 @@ class GameWindow < Gosu::Window
         if Gosu.milliseconds - @time < @moving_x_time
             @moving_piece.dimension.leftX -= 5
             @player_moving = true
-            puts @moving_piece.number
         else
             @moving_piece.dimension.leftX = @tile_leftX
             @move_piece_left = false
             @player_moving = false
             if @moving_x_time > @moving_y_time
                 @snl_moving = @snl_trigger
+                if @snl_trigger 
+                    @moving_piece.number < @moving_piece.goto_number ? @success.play : @fail.play
+                end
                 @snl_trigger = false
             end
             @moving_x_time = 0
@@ -431,6 +439,9 @@ class GameWindow < Gosu::Window
             @player_moving = false
             if @moving_x_time < @moving_y_time
                 @snl_moving = @snl_trigger
+                if @snl_trigger 
+                    @moving_piece.number < @moving_piece.goto_number ? @success.play : @fail.play
+                end
                 @snl_trigger = false
             end
             @moving_y_time = 0
@@ -450,6 +461,9 @@ class GameWindow < Gosu::Window
             @player_moving = false
             if @moving_x_time < @moving_y_time
                 @snl_moving = @snl_trigger
+                if @snl_trigger 
+                    @moving_piece.number < @moving_piece.goto_number ? @success.play : @fail.play
+                end
                 @snl_trigger = false
             end
             @moving_y_time = 0
@@ -502,7 +516,6 @@ class GameWindow < Gosu::Window
 #   move pieces on snake and ladder tiles
   def move_snl 
     if @snl_moving  # if snl movement has been triggered
-        # put sound here 
         @moving_piece.number = @moving_piece.goto_number # set the piece number to the snake or ladder number
         # iterate through each tile to find the tile that the piece is set to move towards
         @board.each do |row|  
@@ -520,11 +533,27 @@ class GameWindow < Gosu::Window
     end
   end
 
+  def track_winners
+    @player_pieces.each do |player|
+        player.each do |piece|
+            if piece.number == 100
+                @winners << @player_pieces.index(player)
+            end
+        end
+    end
+    @winners.each do |winner|
+        if winner == @player_turn
+            @player_turn == @player_number ? @player_turn = 1 : @player_turn += 1
+        end
+    end
+  end
+
   def update
     dice_roll()
     loop_song()
     move_pieces()
     move_snl()
+    track_winners()
   end
 
 
